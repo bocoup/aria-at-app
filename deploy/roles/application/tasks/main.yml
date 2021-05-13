@@ -8,12 +8,19 @@
   set_fact:
     source_dir: /home/{{application_user}}/aria-at-report
 
+- name: Install utility to synchronize source code
+  apt:
+    name: rsync
+    state: present
+  become: yes
+
 - name: Upload project source code
   synchronize:
     src: '{{playbook_dir}}/..'
     dest: '{{source_dir}}'
     rsync_opts:
       - '--filter=:- .gitignore'
+  become: yes
   when: deployment_mode != 'development'
 
 # TODO: this can be removed when the import tests feature is fully complete

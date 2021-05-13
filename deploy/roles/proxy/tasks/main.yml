@@ -30,3 +30,9 @@
     dest: /etc/nginx/sites-enabled/aria-at-app.conf
     state: link
   notify: Restart Nginx
+
+# The Certbot Role depends on the proxy server operating as configured, so if
+# any Task in this Role triggers a Handler, that Handler should run before
+# moving on to the next Role.
+- name: Flush handlers
+  meta: flush_handlers

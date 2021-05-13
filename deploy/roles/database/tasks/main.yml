@@ -4,3 +4,4 @@
     name:
       - postgresql
       - postgresql-contrib
+  become: yes

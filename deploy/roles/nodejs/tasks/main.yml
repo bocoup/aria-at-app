@@ -3,6 +3,7 @@
   apt_key:
     state: present
     url: '{{item}}'
+  become: yes
   with_items:
     - https://dl.yarnpkg.com/debian/pubkey.gpg
     - https://deb.nodesource.com/gpgkey/nodesource.gpg.key
@@ -12,6 +13,7 @@
     state: present
     repo: '{{item}}'
     update_cache: True
+  become: yes
   with_items:
     - deb https://dl.yarnpkg.com/debian/ stable main
     - deb https://deb.nodesource.com/node_12.x buster main
@@ -23,3 +25,4 @@
       - nodejs
       - yarn
     state: present
+  become: yes

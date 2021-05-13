@@ -1,0 +1,29 @@
+---
+# The difference between this environment and aria-at-staging.w3.org is that
+# this environment is Bocoup-internal, and used for testing and sharing the
+# more drastic or long-term changes we're making.
+#
+# - The sandbox environment will track the dev branch, while staging and
+#   production track main
+# - The sandbox environment can be broken, and can be deployed to anytime, as
+#   long as the Bocoup team is aware. (The staging environment is used by a
+#   number of non-Bocoup stakeholders, so it cannot be broken or deployed to
+#   unexpectedly.)
+# - If a hotfix needs to be deployed to production, it can be merged into main
+#   and tested on staging before deploying to production
+# - The dev branch will not be regularly merged into main until we complete the
+#   backend refactor
+#
+# The OAuth app is under Bocoup's GitHub organization. Since the sandbox
+# environment is Bocoup-hosted, for Bocoup by Bocoup, this arrangement seems
+# reasonable. The other apps are under the W3C organization.
+#
+# The linked GitHub teams are aria-at-app-development-testers and
+# aria-at-app-development-admin, same as development environments.
+all:
+  hosts:
+    aria-at-app-sandbox.bocoup.com:
+      needs_become_password: true
+  vars:
+    deployment_mode: staging
+    fqdn: aria-at-app-sandbox.bocoup.com
