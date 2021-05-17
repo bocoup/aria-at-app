@@ -8,20 +8,7 @@
   set_fact:
     source_dir: /home/{{application_user}}/aria-at-report
 
-- name: Install utility to synchronize source code
-  apt:
-    name: rsync
-    state: present
-  become: yes
-
-- name: Upload project source code
-  synchronize:
-    src: '{{playbook_dir}}/..'
-    dest: '{{source_dir}}'
-    rsync_opts:
-      - '--filter=:- .gitignore'
-  become: yes
-  when: deployment_mode != 'development'
+- include: upload-source-code.yml
 
 # TODO: this can be removed when the import tests feature is fully complete
 # This is a workaround solution for shelling out to the import script
@@ -59,12 +46,17 @@
     dest: /home/{{application_user}}/config.env
     src: files/config-{{deployment_mode}}.env
     owner: '{{application_user}}'
+  become: yes
   register: environment_config
 
 - name: Create database and database user
-  command: sudo -u postgres ./db/scripts/db_init.sh {{environment_config.dest}}
+  command: ./db/scripts/db_init.sh {{environment_config.dest}}
+  become: yes
+  become_user: postgres
   args:
     chdir: '{{source_dir}}'
+  vars:
+    ansible_ssh_pipelining: yes
 
 - name: Migrate database
   shell: DOTENV_CONFIG_PATH={{environment_config.dest}} node -r ./node_modules/dotenv/config $(npm bin)/sequelize-cli db:migrate --config ./config/config.js --migrations-path ./server/migrations/

@@ -18,6 +18,7 @@
       systemd:
         daemon_reload: True
     - name: Restart journald daemon
+      become: yes
       systemd:
         name: systemd-journald
         state: restarted

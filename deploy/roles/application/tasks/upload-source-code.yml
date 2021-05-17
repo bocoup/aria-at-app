@@ -1,0 +1,53 @@
+---
+# Ansible's built-in "synchronize" module has a bug which prevents it from
+# functioning in contexts which rely on privilege escalation via the "become"
+# feature:
+#
+# > rsync task "no tty present and no askpass program specified" with sudo
+# > flags and pipelining after 2.0 upgrade
+# https://github.com/ansible/ansible/issues/15297
+#
+# This group of tasks works around this problem by temporarily relaxing the
+# security restrictions which trigger the bug. Specifically:
+#
+# 1. allow the `rsync` utility to be executed as the super user *without*
+#    entering a password
+# 2. execute the `rsync` utility as the super user
+# 3. revoke the security exception
+#
+# This workaround does not meaningfully reduce the security of the system
+# because deploying the playbook requires an administrative password
+# regardless.
+- name: Install utility to synchronize source code
+  apt:
+    name: rsync
+    state: present
+  become: yes
+
+- name: Temporarily allow connecting user to perform synchronization as admin without password
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    line: '%sudo ALL=(ALL) NOPASSWD:/usr/bin/rsync'
+    validate: 'visudo -cf %s'
+  become: yes
+  when: deployment_mode != 'development'
+
+- name: Upload project source code
+  block:
+    - name: Perform source code sychronization
+      synchronize:
+        src: '{{playbook_dir}}/..'
+        dest: '{{source_dir}}'
+        rsync_opts:
+          - '--filter=:- .gitignore'
+      become: yes
+  always:
+    - name: Revoke temporary privilege
+      lineinfile:
+        path: /etc/sudoers
+        state: absent
+        line: '%sudo ALL=(ALL) NOPASSWD:/usr/bin/rsync'
+        validate: 'visudo -cf %s'
+      become: yes
+  when: deployment_mode != 'development'
