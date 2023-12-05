@@ -42,6 +42,14 @@ const throwNoJobFoundError = jobId => {
     );
 };
 
+const throwNoTestFoundError = (testCsvRow, total) => {
+    throw new HttpQueryError(
+        404,
+        `Could not find test at CSV row number ${testCsvRow} (${total} rows available)`,
+        true
+    );
+};
+
 const throwSchedulerError = schedulerResponse => {
     throw new HttpQueryError(
         502,
@@ -135,7 +143,11 @@ const updateOrCreateTestResultWithResponses = async ({
     const runnableTests = await runnableTestsResolver(
         testPlanRun.testPlanReport
     );
-    const testId = runnableTests[testCsvRow].id;
+    const testId = runnableTests[testCsvRow]?.id;
+
+    if (testId === undefined) {
+        throwNoTestFoundError(testCsvRow, runnableTests.length);
+    }
 
     const { testResult } = await findOrCreateTestResult({
         testId,
