@@ -23,7 +23,7 @@ const {
     getFinalizedTestResults
 } = require('../models/services/TestResultReadService');
 const http = require('http');
-const runnableTestsResolver = require('../resolvers/TestPlanReport/runnableTestsResolver');
+const testsResolver = require('../resolvers/TestPlanVersion/testsResolver');
 const httpAgent = new http.Agent({ family: 4 });
 
 const axiosConfig = {
@@ -38,6 +38,14 @@ const throwNoJobFoundError = jobId => {
     throw new HttpQueryError(
         404,
         `Could not find job with jobId: ${jobId}`,
+        true
+    );
+};
+
+const throwNoTestFoundError = (testCsvRow) => {
+    throw new HttpQueryError(
+        404,
+        `Could not find test at CSV row number ${testCsvRow}`,
         true
     );
 };
@@ -132,10 +140,16 @@ const updateOrCreateTestResultWithResponses = async ({
     atVersionId,
     browserVersionId
 }) => {
-    const runnableTests = await runnableTestsResolver(
-        testPlanRun.testPlanReport
+    const allTestsForTestPlanVersion = await testsResolver(
+        testPlanRun.testPlanReport.testPlanVersion
     );
-    const testId = runnableTests[testCsvRow].id;
+    const testId = allTestsForTestPlanVersion.find(
+        test => parseInt(test.rowNumber, 10) === testCsvRow
+    )?.id;
+
+    if (testId === undefined) {
+        throwNoTestFoundError(testCsvRow);
+    }
 
     const { testResult } = await findOrCreateTestResult({
         testId,
