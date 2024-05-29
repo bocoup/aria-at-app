@@ -20,10 +20,16 @@ const {
 const { getTestPlanReportById } = require('./TestPlanReportService');
 const { HttpQueryError } = require('apollo-server-core');
 const { default: axios } = require('axios');
+
 const {
     default: createGithubWorkflow,
     isEnabled: isGithubWorkflowEnabled
 } = require('../../services/GithubWorkflowService');
+
+const {
+    startCollectionJobSimulation
+} = require('../../tests/util/mock-automation-scheduler-server');
+
 const runnableTestsResolver = require('../../resolvers/TestPlanReport/runnableTestsResolver');
 const getGraphQLContext = require('../../graphql-context');
 const { getBotUserByAtId } = require('./UserService');
@@ -255,7 +261,7 @@ const createCollectionJob = async ({
         })),
         transaction
     });
-
+    console.log('created job', collectionJobResult, transaction.id);
     return ModelService.getById(CollectionJob, {
         id: collectionJobResult.id,
         attributes: collectionJobAttributes,
@@ -402,17 +408,7 @@ const triggerWorkflow = async (job, testIds, { transaction }) => {
             // TODO: pass the reduced list of testIds along / deal with them somehow
             await createGithubWorkflow({ job, directory, gitSha });
         } else {
-            await axios.post(
-                `${process.env.AUTOMATION_SCHEDULER_URL}/jobs/new`,
-                {
-                    testPlanVersionGitSha: gitSha,
-                    testIds,
-                    testPlanName: directory,
-                    jobId: job.id,
-                    transactionId: transaction.id
-                },
-                axiosConfig
-            );
+            await startCollectionJobSimulation(job, transaction);
         }
     } catch (error) {
         console.error(error);

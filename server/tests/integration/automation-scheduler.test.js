@@ -1,6 +1,8 @@
 const startSupertestServer = require('../util/api-server');
 const automationRoutes = require('../../routes/automation');
-const setupMockAutomationSchedulerServer = require('../util/mock-automation-scheduler-server');
+const {
+    setupMockAutomationSchedulerServer
+} = require('../util/mock-automation-scheduler-server');
 const db = require('../../models/index');
 const { query, mutate } = require('../util/graphql-test-utilities');
 const dbCleaner = require('../util/db-cleaner');
@@ -18,7 +20,7 @@ let mockAutomationSchedulerServer;
 let apiServer;
 let sessionAgent;
 
-const testPlanReportId = '4';
+const testPlanReportId = '18';
 
 beforeAll(async () => {
     apiServer = await startSupertestServer({
@@ -495,9 +497,12 @@ describe('Automation controller', () => {
             const testResultsNumber =
                 collectionJob.testPlanRun.testResults.length;
             const selectedTestIndex = 0;
-            const selectedTestRowNumber = 1;
 
             const selectedTest = tests[selectedTestIndex];
+            const selectedTestRowNumber = selectedTest.rowNumber;
+            console.log(tests);
+            console.log(tests.map(({ rowNumber }) => rowNumber));
+
             const numberOfScenarios = selectedTest.scenarios.filter(
                 scenario => scenario.atId === at.id
             ).length;

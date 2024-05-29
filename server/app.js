@@ -10,7 +10,9 @@ const transactionRoutes = require('./routes/transactions');
 const automationSchedulerRoutes = require('./routes/automation');
 const path = require('path');
 const apolloServer = require('./graphql-server');
-const setupMockAutomationSchedulerServer = require('./tests/util/mock-automation-scheduler-server');
+const {
+    setupMockAutomationSchedulerServer
+} = require('./tests/util/mock-automation-scheduler-server');
 const transactionMiddleware = require('./middleware/transactionMiddleware');
 const app = express();
 

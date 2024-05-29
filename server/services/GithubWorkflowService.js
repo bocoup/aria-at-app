@@ -140,7 +140,7 @@ const createGithubWorkflow = async ({ job, directory, gitSha }) => {
     const inputs = {
         callback_url: `https://${callbackUrlHostname}/api/jobs/${job.id}/test/:testRowNumber`,
         status_url: `https://${callbackUrlHostname}/api/jobs/${job.id}`,
-        callback_header: `x-automation-secret:${process.env.AUTOMATION_SCHEDULER_SECRET}`,
+        callback_header: `x-automation-secret:${job.secret}`,
         work_dir: `tests/${directory}`,
         aria_at_ref: gitSha
     };

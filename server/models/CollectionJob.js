@@ -31,6 +31,11 @@ module.exports = function (sequelize, DataTypes) {
                 onDelete: 'SET NULL',
                 allowNull: true,
                 unique: true
+            },
+            secret: {
+                type: DataTypes.UUID,
+                allowNull: false,
+                defaultValue: sequelize.literal('gen_random_uuid()')
             }
         },
         {
