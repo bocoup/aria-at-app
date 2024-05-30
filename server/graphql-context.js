@@ -10,7 +10,7 @@ const getGraphQLContext = ({ req }) => {
 
     const atLoader = AtLoader();
     const browserLoader = BrowserLoader();
-
+    console.log('gql context', transaction?.id);
     return { user, atLoader, browserLoader, transaction };
 };
 

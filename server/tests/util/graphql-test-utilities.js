@@ -9,7 +9,33 @@ let mockReq;
 const server = new ApolloServer({
     typeDefs,
     context: () => getGraphQLContext({ req: mockReq }),
-    resolvers
+    resolvers,
+    plugins: [
+        {
+            async requestDidStart(arg) {
+                arg.logger.log = arg.logger.info;
+                console.log('requestDidStart', arg.context, arg.query);
+                return {
+                    async didResolveSource(arg) {
+                        console.log('didResolveSource', arg.source);
+                    },
+                    async parsingDidStart(arg) {
+                        console.log('parsing did start');
+                        return async (err) => console.error(err);
+                    },
+                    async didResolveOperation(arg) {
+                        console.log('didResolveOperation', require('util').inspect(arg.operation, false, 10, true));
+                    },
+                    async didEncounterErrors(arg) {
+                        console.error('didEncounterErrors', arg);
+                    },
+                    async willSendResponse(arg) {
+                        console.log('willSendResponse', arg.response);
+                    }
+                };
+            }
+        }
+    ]
 });
 
 const failWithErrors = errors => {
@@ -61,10 +87,12 @@ const query = async (
     { transaction, user = defaultUser, ...queryOptions } = {}
 ) => {
     mockReq = { session: { user }, transaction };
+    console.log('setup mock req', transaction?.id, gql);
     const { data, errors } = await server.executeOperation({
         query: gql,
         ...queryOptions
     });
+    console.log(data, errors);
     if (errors) failWithErrors(errors);
     return data;
 };

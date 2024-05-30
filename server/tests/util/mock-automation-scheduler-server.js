@@ -136,7 +136,7 @@ const startCollectionJobSimulation = async (job, transaction) => {
         // stub behavior in test suite
         return { status: COLLECTION_JOB_STATUS.QUEUED };
     } else {
-        await timeout(100000);
+        // await timeout(100000);
         console.log('query job', transaction.id, job.id);
         const data = await query(
             gql`

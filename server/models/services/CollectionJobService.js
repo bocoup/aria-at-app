@@ -327,7 +327,8 @@ const getCollectionJobById = async ({
                 browserAttributes
             )
         ],
-        transaction
+        transaction,
+        logging: console.log
     });
 };
 
@@ -388,7 +389,8 @@ const getCollectionJobs = async ({
             )
         ],
         pagination,
-        transaction
+        transaction,
+        logging: console.log
     });
 };
 

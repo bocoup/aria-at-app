@@ -39,7 +39,7 @@ const { sequelize } = require('..');
  */
 const getById = async (
     model,
-    { id, attributes = [], include = [], transaction }
+    { id, attributes = [], include = [], transaction, logging }
 ) => {
     if (!model) throw new Error('Model not defined');
 
@@ -56,7 +56,8 @@ const getById = async (
         where: { id },
         attributes,
         include,
-        transaction
+        transaction,
+        logging
     });
 };
 
@@ -113,7 +114,8 @@ const get = async (
         attributes = [],
         include = [],
         pagination = {},
-        transaction
+        transaction,
+        logging
     }
 ) => {
     if (!model) throw new Error('Model not defined');
@@ -143,7 +145,8 @@ const get = async (
         order,
         attributes,
         include, // included fields being marked as 'required' will affect overall count for pagination
-        transaction
+        transaction,
+        logging
     };
 
     // enablePagination paginated result structure and related values
